@@ -1,4 +1,4 @@
-package com.rabbitmq.direct;
+package com.rabbitmq.fount;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,6 @@ public class SendMessage {
 			String hostName=properties.getProperty("hostName");
 			int portNumber=Integer.valueOf(properties.getProperty("portNumber"));
 			String exchangeName=properties.getProperty("exchangeName");
-			String routingKey=properties.getProperty("routingKey");
 			//创建工厂
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.setHost(hostName);
@@ -33,19 +32,15 @@ public class SendMessage {
 			//创建通道
 			Channel channel = conn.createChannel();
 			
-			//创建交换中心及消息队列
-			channel.exchangeDeclare(exchangeName, "direct", true);
-			//允许一个客户端-->生成的
-			String queueName = channel.queueDeclare().getQueue();
-			//将通道绑定到交换中心
-			channel.queueBind(queueName, exchangeName, routingKey);
+			//创建交换中心及消息队列-->采用广播的方式发送数据
+			channel.exchangeDeclare(exchangeName, "fanout",true);
 			
 			String message="";
 			do{
 				System.out.println("请输入数据：");
 				message=scanner.nextLine();
 				//发送数据-->等待将该数据消费了
-				channel.basicPublish(exchangeName, routingKey, null, message.getBytes());
+				channel.basicPublish(exchangeName, "", null, message.getBytes());
 				System.out.println("是否继续发送数据：是(y) 否(n)");
 			}while("y".equalsIgnoreCase(message=scanner.nextLine()));
 		} catch (Exception e) {

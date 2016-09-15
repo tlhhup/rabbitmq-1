@@ -103,4 +103,61 @@ AMQP，即Advanced Message Queuing Protocol，高级消息队列协议，是应�
 				        ...
 				    }
 				});
+2. 默认用户guest、guest只能方法localhost的主机
+##
+###和spring整合
+1. 重要的类
+	1. Message : Spring AMQP定义的Message类是AMQP域模型中代表之一。Message类封装了body(消息BODY)和properties（消息属性） 
+	2. MessageProperties类中定义了例如messageId、timestamp、contentType等属性。这此属性可以扩展到用户通过setHeader(String key, Object value)方法来自定义“headers”。
+	2. Exchange接口代表一个AMQP的Exchange，决定消息生产者发送消息。每个Exchange都包括一个特定的唯一名字的虚拟主机的代理和一些其他属性。
+	3. Queue类是消息消费者接收消息中重要的一个组成部分。通过与Exchange判定来肯定消费者所接收的消息
+	4. Bingding类通过多种构造参数来判定Exchange,Queue,routingkey
+	5. AmqpTemplate是用来发送消息的模板类 
+	6. AmqpAdmin和RabbitAdmin:用户配置Queue、Exchange、Binding的代理类。代理类会自动声明或创建这些配置信息。
+	7. 异步接收消息的处理类
+		1. MessageConverter 消息转换器类
+		2. SimpleMessageListenerContainer 监听消息容器类
+3. 整合
+	1. jar包：amqp-client、spring-rabbit、spring-amqp
+	2. 在rabbitmq的配置文件中配置以下信息
+		1. 采用bean的方式配置
+			1. 配置连接：connectionFactory-->CachingConnectionFactory工厂bean
+			2. 配置rabbitTemplate 消息模板类：---->RabbitTemplate类
+			3. 配置rabbitAdmin代理--->RabbitAdmin
+			4. 配置消息队列：Queue
+		3. 采用spring提供的rabbitmq的文档声明
+
+				<rabbit:connection-factory id="connectionFactory" username="guest" password="guest" host="localhost" channel-cache-size="25" />
+				<rabbit:template id="amqpTemplate" connection-factory="connectionFactory" />
+				<rabbit:admin connection-factory="connectionFactory" />
+				<rabbit:queue name="examplus.answersheetToScoreMaker" />
+		4. 发送消息
+			1. amqpTemplate.convertAndSend
+		2. 获取消息
+			1. 同步
+				1. amqpTemplate.receiveAndConvert()  
+				2. 使用传统的方式从consumer中获取  
+			3. 异步：在接收者配置文件中通过消息监听器获取消息并处理消息
+				1. 配置消息的处理器类
+
+						 <bean id="receiveHandler" class="cn.slimsmart.rabbitmq.demo.spring.async.ReceiveMsgHandler"></bean> 
+				2. 配置消息转换器
+
+						<bean id="messageConverter" class="org.springframework.amqp.support.converter.SimpleMessageConverter"> </bean> 
+				3. 配置消息适配器
+
+						<bean id="receiveListenerAdapter"    
+						    class="org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter">    
+						    <constructor-arg ref="receiveHandler" />    
+						    <property name="defaultListenerMethod" value="handleMessage"></property>    
+						    <property name="messageConverter" ref="messageConverter"></property>    
+						</bean>  
+				4. 配置消息监听器
+
+						<bean id="listenerContainer"    
+						    class="org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer">    
+						    <property name="queueNames" value="${rabbit.queue}"></property>   
+						    <property name="connectionFactory" ref="rabbitConnectionFactory"></property>    
+						    <property name="messageListener" ref="receiveListenerAdapter"></property>    
+						</bean>
 

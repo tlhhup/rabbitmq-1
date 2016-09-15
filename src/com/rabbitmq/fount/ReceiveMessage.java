@@ -1,4 +1,4 @@
-package com.rabbitmq.direct;
+package com.rabbitmq.fount;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +32,6 @@ public class ReceiveMessage {
 				String hostName = properties.getProperty("hostName");
 				int portNumber = Integer.valueOf(properties.getProperty("portNumber"));
 				String exchangeName = properties.getProperty("exchangeName");
-				String routingKey = properties.getProperty("routingKey");
 				// 创建工厂
 				ConnectionFactory factory = new ConnectionFactory();
 				factory.setHost(hostName);
@@ -47,21 +46,18 @@ public class ReceiveMessage {
 				Channel channel = conn.createChannel();
 
 				// 创建交换中心及消息队列
-				channel.exchangeDeclare(exchangeName, "direct", true);
+				channel.exchangeDeclare(exchangeName, "fanout");
 				String queueName = channel.queueDeclare().getQueue();
 				// 使用指定的路由key将通道绑定到交换中心
-				channel.queueBind(queueName, exchangeName, routingKey);
+				channel.queueBind(queueName, exchangeName, "");
 
 				// 接受数据
-				channel.basicConsume(queueName, false, "myConsumerTag", new DefaultConsumer(channel) {
+				channel.basicConsume(queueName, true, "myConsumerTag", new DefaultConsumer(channel) {
 					@Override
 					public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
 							byte[] body) throws IOException {
-						long deliveryTag = envelope.getDeliveryTag();
 						String message = new String(body);
 						System.out.println("收到的消息为：" + message);
-						//设置为接收到了数据
-						channel.basicAck(deliveryTag, false);
 					}
 				});
 			} catch (Exception e) {
