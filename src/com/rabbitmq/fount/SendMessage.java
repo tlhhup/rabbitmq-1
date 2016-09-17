@@ -20,7 +20,7 @@ public class SendMessage {
 			String password=properties.getProperty("password");
 			String hostName=properties.getProperty("hostName");
 			int portNumber=Integer.valueOf(properties.getProperty("portNumber"));
-			String exchangeName=properties.getProperty("exchangeName");
+			String exchangeName=properties.getProperty("fanoutExchangeName");
 			//创建工厂
 			ConnectionFactory factory = new ConnectionFactory();
 			factory.setHost(hostName);

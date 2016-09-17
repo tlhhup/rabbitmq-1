@@ -14,9 +14,7 @@ import com.rabbitmq.client.Envelope;
 public class ReceiveMessage {
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 5; i++) {
-			new Thread(new ReceiverClient()).start();
-		}
+		new Thread(new ReceiverClient()).start();
 	}
 
 	public static class ReceiverClient implements Runnable {
@@ -31,7 +29,7 @@ public class ReceiveMessage {
 				String password = properties.getProperty("password");
 				String hostName = properties.getProperty("hostName");
 				int portNumber = Integer.valueOf(properties.getProperty("portNumber"));
-				String exchangeName = properties.getProperty("exchangeName");
+				String exchangeName = properties.getProperty("fanoutExchangeName");
 				// 创建工厂
 				ConnectionFactory factory = new ConnectionFactory();
 				factory.setHost(hostName);
@@ -45,8 +43,8 @@ public class ReceiveMessage {
 				// 创建通道
 				Channel channel = conn.createChannel();
 
-				// 创建交换中心及消息队列
-				channel.exchangeDeclare(exchangeName, "fanout");
+				// 申明exchange，注意该信息在服务中定义好的
+				channel.exchangeDeclare(exchangeName, "fanout",true);
 				String queueName = channel.queueDeclare().getQueue();
 				// 使用指定的路由key将通道绑定到交换中心
 				channel.queueBind(queueName, exchangeName, "");

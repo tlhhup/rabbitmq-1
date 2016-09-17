@@ -31,7 +31,7 @@ public class ReceiveMessage {
 				String password = properties.getProperty("password");
 				String hostName = properties.getProperty("hostName");
 				int portNumber = Integer.valueOf(properties.getProperty("portNumber"));
-				String exchangeName = properties.getProperty("exchangeName");
+				String exchangeName = properties.getProperty("directExchangeName");
 				String routingKey = properties.getProperty("routingKey");
 				// 创建工厂
 				ConnectionFactory factory = new ConnectionFactory();
