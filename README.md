@@ -52,10 +52,14 @@ AMQP，即Advanced Message Queuing Protocol，高级消息队列协议，是应�
 			channel.queueBind(queueName, exchangeName, routingKey);
 	3. exchange的三种模式(在webui管理器中可以查询到)
 		1. **direct exchange** 发送消息是要看routingKey的。举个例子，定义了一个direct exchange 名字是X1，然后一个queue名字为Q1 用routingKey=K1 绑定到exchange X1上，当一个routeKey为 K2 的消息到达X1上，那么只有**K1=K2**的时候，这个消息才能到达Q1上。**路由值相等**
+
+			![](http://i.imgur.com/bvMe0mV.png)
 		2. **fanout类型的exchange**就比较好理解。就是简单的**广播**，而且是忽略routingKey的。所以只要是有queue绑定到fanout exchange上，通过这个exchange发送的消息都会被发送到那些绑定的queue中，不管你有没有输入routingKey。
 		3. **Topic类型的exchange**给与我们更大的灵活性。通过定义routingKey可以有选择的订阅某些消息，此时routingKey就会是一个表达式。exchange会通过**匹配绑定的routingKey**来决定是否要把消息放入对应的队列中。有两种表达式符号可以让我们选择：#和*。
 			1. `*`（星号）：代表任意的一个词。 例：*.a会匹配a.a，b.a，c.a等
 			2. #（井号）：代码任意的0个或多个词。 例：#.a会匹配a.a，aa.a，aaa.a等
+
+			![](http://i.imgur.com/g8DxhHJ.png)
 	4. **注意事项**
 		1. 使用不同类型的exchange时需要通过webui中得到对应的exchange信息(当然也可以先通过web管理器创建)
 				
